@@ -1,0 +1,5 @@
+tensorflow
+matplotlib
+notebook
+jupyter_http_over_ws
+siaskynet
