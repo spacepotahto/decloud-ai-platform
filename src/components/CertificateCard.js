@@ -38,7 +38,7 @@ export const CertificateCard = (props) => {
     {
       props.certificate.state !== '' && 
     
-      <Card className={classes.root} variant="outlined">
+      <Card className={`${classes.root} ${props.classes}`} variant="outlined">
         <CardContent className={classes.root}>
           {
             props.certificate.state === 'valid' && (

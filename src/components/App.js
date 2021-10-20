@@ -12,15 +12,18 @@ import Divider from '@material-ui/core/Divider';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
-import CertificateOutline from 'mdi-material-ui/CertificateOutline';
+import VpnKey from '@material-ui/icons/VpnKey';
 import NotebookMultiple from 'mdi-material-ui/NotebookMultiple';
 import Graph from 'mdi-material-ui/Graph';
-import DecloudLogo from '../assets/decloud-logo.png';
+import DecloudLogo from '../assets/akash-filebase.png';
 import { WalletDisplay } from './WalletDisplay';
 import { useAccount } from '../utils/AccountContext';
 import Button from '@material-ui/core/Button';
+import IconButton from '@material-ui/core/IconButton';
+import Help from '@material-ui/icons/Help';
 import SvgIcon from '@material-ui/core/SvgIcon';
-import { ManageCertificate } from './ManageCertificate';
+import Fab from '@material-ui/core/Fab';
+import { ManageKeys } from './ManageKeys';
 import { NotebooksTable } from './NotebooksTable';
 import { NotebookCreate } from './NotebookCreate';
 import { ModelsTable } from './ModelsTable';
@@ -63,7 +66,8 @@ const useStyles = makeStyles((theme) => ({
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'flex-end',
-    alignItems: 'center'
+    alignItems: 'center',
+    padding: theme.spacing(2),
   },
   // necessary for content to be below app bar
   toolbar: theme.mixins.toolbar,
@@ -82,6 +86,11 @@ const useStyles = makeStyles((theme) => ({
   marginTop: {
     marginTop: theme.spacing(2),
   },
+  bottomRightFixed: {
+    position: 'fixed',
+    bottom: '0px',
+    right: '0px'
+  }
 }));
 
 export const App = () => {
@@ -106,6 +115,14 @@ export const App = () => {
   return (
     <div className={classes.root}>
       <CssBaseline />
+      {/* <AppBar position="fixed" className={classes.appBar}>
+        <Toolbar className={classes.appToolbar}>
+          <IconButton color="primary" aria-label="more information" component="span"
+            onClick={() => { window.open('https://forum.akash.network/t/akash-filebase-ai-ml-decloud-platform/2588', '_blank'); }}>
+            <Help fontSize="large" />
+          </IconButton>
+        </Toolbar>
+      </AppBar> */}
       <Drawer
         className={classes.drawer}
         variant="permanent"
@@ -120,7 +137,7 @@ export const App = () => {
               <img src={DecloudLogo} style={{ width: '100%' }} alt="decloud" />
             </Box>
             <Typography variant="h5" noWrap>
-              AI Platform
+              DeCloud ML
             </Typography>
           </Container>
         </div>
@@ -133,9 +150,9 @@ export const App = () => {
           <ListItemIcon><Graph /></ListItemIcon>
           <ListItemText primary="Models" />
         </ListItem>
-        <ListItem button key="Certificates" selected={view === 'Certificates'} onClick={() => setView('Certificates')}>
-          <ListItemIcon><CertificateOutline /></ListItemIcon>
-          <ListItemText primary="Certificates" />
+        <ListItem button key="Keys" selected={view === 'Keys'} onClick={() => setView('Keys')}>
+          <ListItemIcon><VpnKey /></ListItemIcon>
+          <ListItemText primary="Keys & Certs" />
         </ListItem>
         </List>
         <div className={classes.walletContainer}>
@@ -143,7 +160,7 @@ export const App = () => {
         </div>
       </Drawer>
       <main className={classes.content}>
-        <div className={classes.toolbar} />
+        {/* <div className={classes.toolbar} /> */}
         {
           view === 'Notebooks' && (
             <Container className={classes.containerCenter}>
@@ -168,12 +185,18 @@ export const App = () => {
           )
         }
         {
-          view === 'Certificates' && (
-            <Container className={classes.containerCenter}>
-              <ManageCertificate updateBalance={updateBalance}/>
+          view === 'Keys' && (
+            <Container >
+              <ManageKeys updateBalance={updateBalance}/>
             </Container>
           )
         }
+        <div className={classes.bottomRightFixed}>
+        <IconButton color="primary" aria-label="more information" component="span"
+          onClick={() => { window.open('https://forum.akash.network/t/akash-filebase-ai-ml-decloud-platform/2588', '_blank'); }}>
+          <Help fontSize="large" />
+        </IconButton>
+        </div>
       </main>
     </div>
   );

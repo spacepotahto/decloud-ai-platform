@@ -76,7 +76,7 @@ export const NotebooksTable = (props) => {
   const akash = account.akash;
   
   return (
-    <div style={{ height: 'calc(100vh - 200px)', width: '100%' }}>
+    <div style={{ height: 'calc(100vh - 150px)', width: '100%' }}>
       <DataGrid
         rows={rows}
         columns={columns}
