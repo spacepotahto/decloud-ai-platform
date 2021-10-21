@@ -2,4 +2,4 @@
 
 See https://forum.akash.network/t/akash-filebase-ai-ml-decloud-platform/2588/9
 
-This is a prototype to demonstrate that Akash and Filebase together can be used to power AI/ML pipelines. Absolutely DON'T use in production.
+This is a prototype to demonstrate that Akash and Filebase together can be used to power AI/ML pipelines. Absolutely DON'T use in production yet until I improve this in the future.
