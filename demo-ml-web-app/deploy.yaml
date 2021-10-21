@@ -1,0 +1,63 @@
+---
+version: "2.0"
+
+services:
+  flaskserver:
+    image: ghcr.io/spacepotahto/demo-mnist-flask:0.1.0
+    env:
+      # replace with your own
+      - MODEL_PREDICT_ENDPOINT=http://0cabumr13da197h23n5dq0og6s.ingress.provider-0.prod.sjc1.akash.pub/v1/models/mnist:predict
+    expose:
+      - port: 5000
+  web:
+    image: ghcr.io/spacepotahto/demo-mnist-web-app:0.1.0
+    expose:
+      - port: 80
+        as: 80
+        to:
+          - global: true
+    depends-on:
+      - flaskserver
+
+profiles:
+  compute:
+    flaskserver:
+      resources:
+        cpu:
+          units: 1
+        memory:
+          size: 1Gi
+        storage:
+          size: 2Gi
+    web:
+      resources:
+        cpu:
+          units: 1
+        memory:
+          size: 1Gi
+        storage:
+          size: 1Gi
+  placement:
+    westcoast:
+      attributes:
+        host: akash
+      signedBy:
+        anyOf:
+          - "akash1365yvmc4s7awdyj3n2sav7xfx76adc6dnmlx63"
+      pricing:
+        flaskserver: 
+          denom: uakt
+          amount: 1000
+        web: 
+          denom: uakt
+          amount: 1000
+
+deployment:
+  flaskserver:
+    westcoast:
+      profile: flaskserver
+      count: 1
+  web:
+    westcoast:
+      profile: web
+      count: 1

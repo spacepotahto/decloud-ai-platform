@@ -64,9 +64,6 @@ export default function DeployStepper(props) {
   const classes = useStyles();
   const [activeStep, setActiveStep] = React.useState(0);
 
-  // const [isCreateDeploymentStep, setIsCreateDeploymentStep] = React.useState(true);
-  // const [isChooseProviderStep, setIsChooseProviderStep] = React.useState(false);
-  // const [isCreateLeaseStep, setIsCreateLeaseStep] = React.useState(false);
   const [createDeploymentResult, setCreateDeploymentResult] = React.useState({});
   const [bidsList, setBidsList] = React.useState([]);
   const [winProvider, setWinProvider] = React.useState('');
@@ -205,6 +202,16 @@ export default function DeployStepper(props) {
     if (winProvider !== '') {
       createLease().then((leaseStatus) => {
         handleNext();
+        props.handleDeploymentEnd({
+          id: createDeploymentResult.dseq,
+          name: props.payload.project,
+          modelName: props.payload.modelname,
+          info: Object.assign({
+            CPU: props.payload.cpu,
+            Memory: props.payload.memory,
+            Storage: props.payload.storage
+          }, leaseStatus)
+        });
         setLeaseStatusResult(leaseStatus);
       });
     }
