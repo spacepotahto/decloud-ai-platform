@@ -91,11 +91,11 @@ export const ManageKeys = (props) => {
     setAccessKeysExist(keys != null);
   };
 
-  const setAccessKeys = async (rKey, rSecret) => {
-    if (rKey === '' || rSecret === '') {
+  const setAccessKeys = async (rKey, rSecret, bucket) => {
+    if (rKey === '' || rSecret === '' || bucket === '') {
       return;
     }
-    await setS3Keys(account.address, { rKey, rSecret });
+    await setS3Keys(account.address, { rKey, rSecret, bucket });
     setAccessKeysExist(true);
   };
 
@@ -116,7 +116,7 @@ export const ManageKeys = (props) => {
     </Typography>
     <CertificateCard classes={`${classes.marginTop} ${classes.marginBottom}`} certificate={certificate} revoke={revoke} create={create} buttonBusy={busy}/>
     <Typography variant="h5" noWrap>
-      Filebase Access Keys
+      Filebase Access Keys and Bucket
     </Typography>
     <S3KeysCard classes={`${classes.marginTop} ${classes.marginBottom}`} accessKeysExist={accessKeysExist} setAccessKeys={setAccessKeys} removeAccessKeys={removeAccessKeys}/>
     </>

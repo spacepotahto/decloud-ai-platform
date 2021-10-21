@@ -1,0 +1,14 @@
+version: '3.8'
+services:
+  flaskserver:
+    image: ghcr.io/spacepotahto/demo-mnist-flask:0.1.0
+    environment:
+      - MODEL_PREDICT_ENDPOINT=http://0cabumr13da197h23n5dq0og6s.ingress.provider-0.prod.sjc1.akash.pub/v1/models/mnist:predict
+    ports:
+      - '5000:5000'
+  web:
+    image: ghcr.io/spacepotahto/demo-mnist-web-app:0.1.0
+    ports:
+      - '80:80'
+    depends_on:
+      - flaskserver

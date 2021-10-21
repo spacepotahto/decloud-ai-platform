@@ -14,6 +14,9 @@ import OutlinedInput from '@material-ui/core/OutlinedInput';
 import InputLabel from '@material-ui/core/InputLabel';
 import IconButton from '@material-ui/core/IconButton';
 import InputAdornment from '@material-ui/core/InputAdornment';
+import TextField from '@material-ui/core/TextField';
+import { useAccount } from '../utils/AccountContext';
+import { getS3Keys } from '../utils/s3keys';
 
 const useStyles = makeStyles({
   root: {
@@ -37,12 +40,16 @@ const useStyles = makeStyles({
 
 export const S3KeysCard = (props) => {
   const classes = useStyles();
+  const account = useAccount();
 
   const [values, setValues] = React.useState({
     rKey: '',
     rSecret: '',
+    bucket: '',
     showPassword: false,
   });
+
+  const [bucket, setBucket] = React.useState("");
 
   const handleChange = (prop) => (event) => {
     setValues({ ...values, [prop]: event.target.value });
@@ -56,15 +63,28 @@ export const S3KeysCard = (props) => {
     event.preventDefault();
   };
 
+  React.useEffect(() => {
+    const setSavedBucket = async () => {
+      const s3Keys = await getS3Keys(account.address);
+      setBucket(s3Keys ? s3Keys.bucket : "");
+    }
+    setSavedBucket();
+  }, [account]);
+
   return (
     <React.Fragment>
       <Card className={`${classes.root} ${props.classes}`} variant="outlined">
         <CardContent className={classes.root}>
           {
             props.accessKeysExist && (
+              <>
                 <Typography variant="h5" color="textSecondary">
                   <VerifiedUserIcon color="secondary"/> Access Keys Exist
                 </Typography>
+                <Typography className={classes.pos} color="textSecondary">
+                  {`Bucket: ${bucket}`}
+                </Typography>
+              </>
             )
           }
           {
@@ -74,7 +94,7 @@ export const S3KeysCard = (props) => {
                   <ErrorIcon color="secondary"/> No Access Keys Found
                 </Typography>
                 <Typography className={classes.pos} color="textSecondary">
-                  Access keys are required to interact with Filebase. Please specify them below.
+                  A dedicated Filebase bucket and access keys are required. Please specify them below.
                 </Typography>
               </React.Fragment>
             )
@@ -95,6 +115,7 @@ export const S3KeysCard = (props) => {
           {
             !props.accessKeysExist && (
               <>
+ 
               <FormControl color="secondary" variant="outlined">
                 <InputLabel htmlFor="password-input">Key</InputLabel>
                 <OutlinedInput
@@ -141,7 +162,17 @@ export const S3KeysCard = (props) => {
                   labelWidth={100}
                 />
               </FormControl>
-              <Button size="large" variant="contained" color="secondary" onClick={() => props.setAccessKeys(values.rKey, values.rSecret)}>
+              <TextField color="secondary"
+                id="bucket-name-input"
+                label="Bucket Name"
+                variant="outlined"
+                value={values.bucket}
+                onChange={handleChange('bucket')}
+              />
+              <Button size="large" variant="contained" color="secondary" onClick={() => {
+                setBucket(values.bucket);
+                props.setAccessKeys(values.rKey, values.rSecret, values.bucket);
+              }}>
                 Save
               </Button>
               </>

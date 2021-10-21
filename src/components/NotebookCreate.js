@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useAccount } from '../utils/AccountContext';
 import { SDL, loadPEMBlocks } from 'akashjs';
+import { getS3Keys } from '../utils/s3keys';
 import Card from '@material-ui/core/Card';
 import CardActionArea from '@material-ui/core/CardActionArea';
 import CardContent from '@material-ui/core/CardContent';
@@ -27,6 +28,7 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DeployStepper from './DeployStepper';
+import { getNotebookDeployments, setNotebookDeployments } from '../utils/deployments';
 
 const useStyles = makeStyles((theme) => ({
   marginTop: {
@@ -84,13 +86,22 @@ export const NotebookCreate = (props) => {
 
   const [open, setOpen] = useState(false);
   const [certAlert, setCertAlert] = useState(false);
+  const [s3KeysAlert, setS3KeysAlert] = useState(false);
   const [formAlert, setFormAlert] = useState(false);
   const [dismissable, setDismissable] = useState(false);
+  const [s3Config, setS3Config] = useState(false);
+
+  useEffect(() => {
+    const updateS3Config = async () => setS3Config(await getS3Keys(account.address));
+    updateS3Config();
+  }, [account]);
 
   const handleClickOpen = async () => {
     const cert = await loadPEMBlocks(account.address).catch((e) => console.log(e));
     if (!cert) {
       setCertAlert(true);
+    } else if (!s3Config) {
+      setS3KeysAlert(true);
     } else if (
          values.project === ''
       || values.password === ''
@@ -107,20 +118,36 @@ export const NotebookCreate = (props) => {
   const handleClose = () => {
     setOpen(false);
     setCertAlert(false);
+    setS3KeysAlert(false);
     setFormAlert(false);
   };
 
+  const handleBack = () => {
+    handleClose();
+    props.handleBack();
+  };
+
   const generateSDLString = () => {
-    return (
+    const sdl = (
 `---
 version: "2.0"
 
 services:
   web:
-    image: ovrclk/lunie-light
+    image: ghcr.io/spacepotahto/jupyter-s3-tensorflow-notebook:0.1.0
+    env:
+      - AWS_ACCESS_KEY_ID=${s3Config.rKey}
+      - AWS_SECRET_ACCESS_KEY=${s3Config.rSecret}
+      - ROOT_BUCKET=${s3Config.bucket}
+      - PROJECT_DIR=${values.project.replace(' ', '-')}
+      - JUPYTER_PASSWORD=${values.password}
     expose:
-      - port: 3000
+      - port: 8888
         as: 80
+        to:
+          - global: true
+      - port: 6006
+        as: 6006
         to:
           - global: true
 
@@ -129,11 +156,11 @@ profiles:
     web:
       resources:
         cpu:
-          units: 0.1
+          units: ${values.cpu}
         memory:
-          size: 512Mi
+          size: ${values.memory}Gi
         storage:
-          size: 512Mi
+          size: ${values.storage}Gi
   placement:
     westcoast:
       attributes:
@@ -152,6 +179,7 @@ deployment:
       profile: web
       count: 1`
     )
+    return sdl;
   };
 
   const handleChange = (prop) => (event) => {
@@ -164,6 +192,12 @@ deployment:
 
   const handleMouseDownPassword = (event) => {
     event.preventDefault();
+  };
+
+  const handleDeploymentEnd = async (deployment) => {
+    const deployments = await getNotebookDeployments(account.address);
+    deployments.push(deployment);
+    await setNotebookDeployments(account.address, deployments.slice());
   };
   
   return (
@@ -315,7 +349,7 @@ deployment:
           <span>Deploy Notebook</span>
         </Button>
       </Container>
-      <Dialog
+      {s3Config && <Dialog
         open={open}
         onClose={(event, reason) => {
           if (reason !== 'backdropClick') {
@@ -331,19 +365,34 @@ deployment:
               handleDialogClose={handleClose}
               handleSetDismissable={setDismissable}
               updateBalance={props.updateBalance}
+              handleDeploymentEnd={handleDeploymentEnd}
+              payload={values}
             ></DeployStepper>
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose} variant="contained" color="secondary" disabled={!dismissable}>
+          <Button onClick={handleBack} variant="contained" color="secondary" disabled={!dismissable}>
+            Notebooks List
+          </Button>
+        </DialogActions>
+      </Dialog>
+      }
+      <Dialog open={certAlert}>
+        <DialogContent>
+          <DialogContentText>
+            No valid certificate found. A valid certificate is required for deployments. Please go to "Keys & Certs" tab to create one.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose} variant="contained" color="secondary">
             Close
           </Button>
         </DialogActions>
       </Dialog>
-      <Dialog open={certAlert}>
+      <Dialog open={s3KeysAlert}>
         <DialogContent>
           <DialogContentText>
-            No valid certificate found. A valid certificate is required for deployments. Please go to "Certificate" tab to create one.
+            No Filebase access keys and bucket found. Please go to "Keys & Certs" tab to specify them.
           </DialogContentText>
         </DialogContent>
         <DialogActions>

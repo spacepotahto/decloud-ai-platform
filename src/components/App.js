@@ -115,14 +115,6 @@ export const App = () => {
   return (
     <div className={classes.root}>
       <CssBaseline />
-      {/* <AppBar position="fixed" className={classes.appBar}>
-        <Toolbar className={classes.appToolbar}>
-          <IconButton color="primary" aria-label="more information" component="span"
-            onClick={() => { window.open('https://forum.akash.network/t/akash-filebase-ai-ml-decloud-platform/2588', '_blank'); }}>
-            <Help fontSize="large" />
-          </IconButton>
-        </Toolbar>
-      </AppBar> */}
       <Drawer
         className={classes.drawer}
         variant="permanent"
@@ -164,7 +156,7 @@ export const App = () => {
         {
           view === 'Notebooks' && (
             <Container className={classes.containerCenter}>
-              <NotebooksTable />
+              <NotebooksTable updateBalance={updateBalance} />
               <Button variant="contained" onClick={() => setView('NotebookCreate')}
                 color="primary" size="large" className={classes.marginTop}>
                 <span>Create Notebook</span>
@@ -174,13 +166,13 @@ export const App = () => {
         }
         {
           view === 'NotebookCreate' && (
-            <NotebookCreate updateBalance={updateBalance}/>
+            <NotebookCreate updateBalance={updateBalance} handleBack={() => setView('Notebooks')}/>
           )
         }
         {
           view === 'Models' && (
             <Container className={classes.containerCenter}>
-              <ModelsTable />
+              <ModelsTable updateBalance={updateBalance} />
             </Container>
           )
         }
